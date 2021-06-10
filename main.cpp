@@ -5,16 +5,22 @@ using namespace std;
 
 int main()
 {
-    SortedList list = SortedList();
 
-    list.insert(5);
-    list.insert(4);
-    list.insert(-2);
-    list.insert(-1);
+    SortedList<string> lst1 = SortedList<string>();lst1.insert("Charlie");lst1.insert("Bob");lst1.insert("Alice");lst1.insert("Donald");
+    lst1.insert("AAB");
+    lst1.insert("ABA");
+    lst1.insert("AA");
+    lst1.print();
+    // SortedList<int> list = SortedList<int>();
 
-    list.print();
+    // list.insert(5);
+    // list.insert(4);
+    // list.insert(-2);
+    // list.insert(-1);
 
-    SortedList list2(list);
+    // list.print();
+
+    /* SortedList list2(list);
 
     cout << "list 2 prints: \n";
     list2.print();
@@ -44,6 +50,7 @@ int main()
     
     cout << " \n\n";
     
+    
     cout << "list 3 after assign to list2 prints: \n";
     list3 = list2;
     list3.print();
@@ -55,13 +62,17 @@ int main()
     list3 = list;
     list3.print();
 
-    // int index =1;
-    // for(SortedList::const_iterator i = list.begin(); !(i == list.end()); ++i)
-    // {   
-    //     cout << "the index " << index << " in list is :" << *i << endl;
-    //     index++;
-    // }
 
+    //-1 -4 5 
+    int index = 0;
+    for(SortedList::const_iterator i = list.begin(); !(i == list.end()); i = list.begin())
+    {
+        list.remove(i);
+        //cout << "the index " << index << " in list is :" << *i << endl;
+        list.print();
+        //index++;
+    }
+*/
 
     return 0;
 }

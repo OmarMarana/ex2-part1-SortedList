@@ -6,6 +6,7 @@
 
 namespace mtm
 {
+    template<class T>
     class SortedList
     {
         public:
@@ -16,7 +17,7 @@ namespace mtm
             SortedList(const SortedList&); //copy constructor
 
             SortedList& operator=(const SortedList& other); // list1 = list2;
-            void insert(int data);
+            void insert(T data);
             void remove(const_iterator element);
             int length() const;
             
@@ -35,14 +36,15 @@ namespace mtm
             void clearNodes();
     };
 
-    class SortedList::const_iterator
+    template <class T>
+    class SortedList<T>::const_iterator
     {
         friend class SortedList;
+
         const SortedList* list;
         int index;
 
         const_iterator(const SortedList* list, int index);
-
 
         public:
             ~const_iterator() = default;
@@ -51,21 +53,18 @@ namespace mtm
 
             const_iterator& operator++(); // Usage: ++ it1 , if out of bound, throw std::out_of_range
             bool operator==(const const_iterator& other) const;
-            int operator*() const;
-            // {
-            //     return 0;
-            // }
+            const T operator*() const;
     };
 
-    class SortedList::Node
+    template<class T>
+    class SortedList<T>::Node
     {
         public:
-            Node();
-            Node(const int data);
+            Node(const T data);
             Node(const Node& node);
             ~Node();
         
-            const int data; //int = T
+            const T data;
             Node* next;
     };
 
@@ -75,19 +74,22 @@ namespace mtm
     
 
     /* Constructor */
-    SortedList::SortedList() : head(new Node())
+    template<class T>
+    SortedList<T>::SortedList() : head(nullptr)
     { }
 
     /* Destructor */
-    SortedList::~SortedList()
+    template<class T>
+    SortedList<T>::~SortedList()
     {
         clearNodes();
     }
 
     /* Copy Constructor */
-    SortedList::SortedList(const SortedList& other) : head(new Node())
+    template<class T>
+    SortedList<T>::SortedList(const SortedList<T>& other) : head(nullptr)
     {
-        Node* ptr = other.head->next;
+        Node* ptr = other.head;
 
         while(ptr != nullptr)
         {
@@ -97,35 +99,51 @@ namespace mtm
     }
     
     /* operator = */
-    SortedList& SortedList::operator=(const SortedList& other) // NOT WORKING
+    template<class T>
+    SortedList<T>& SortedList<T>::operator=(const SortedList<T>& other)
     {
         if(this == &other)
         {
             return *this;
         }
-
-        std::cout << " *operator=* list before clear: \n";
-        this->print();
         this->clearNodes();
-        std::cout << " *operator=* list after clear: \n";
-        this->print();
-        std::cout << " \n\n";
-        
 
         for (const_iterator it = other.begin(); ! (it == other.end()); ++it)
         {
-
             this->insert(*it);
         }
         return *this;
     }
 
     /* Insert */
-    void SortedList::insert(int data)
+    template<class T>
+    void SortedList<T>::insert(T data)
     {
         Node* new_node = new Node(data);
-        Node* prev = head;
-        Node* current = prev->next;
+        if(head == nullptr)
+        {
+            head = new_node;
+            return;
+        }
+
+        Node* prev;
+        Node* current = head;
+
+        if(data < head->data)
+        {
+            new_node->next = head;
+            head = new_node;
+            return;
+        }
+
+        if(length() == 1)
+        {
+            head->next = new_node;
+            return;
+        }
+
+        prev = head;
+        current = head->next;
 
         while(current != nullptr)
         {
@@ -142,15 +160,36 @@ namespace mtm
         prev->next = new_node;
     }
 
-    void SortedList::remove(const_iterator element)
-    {  
+    template<class T>
+    void SortedList<T>::remove(const_iterator element)
+    {
+        if(element.index >= length())
+        {
+            return;
+        }
+
+        if(length() == 1)
+        {
+            delete head;
+            head = nullptr;
+            return;
+        }
+
+        if(element.index == 0)
+        {
+            Node* tmp = head;
+            head = head->next;
+            delete tmp;
+            return;
+        }
+
+        
         Node* prev = head;
         Node* current =  head;
 
-
         for(int i = 0; i < element.index ; i++)
         {
-            if(i == element.index -1)
+            if(i == element.index - 1)
             {
                 prev = current;
             }
@@ -158,39 +197,44 @@ namespace mtm
         }
 
         Node* next =  current->next;
-        delete current; // may not delete data properly...
+        delete current;
         prev->next = next;
     }
 
 
     /* Length */
-    int SortedList::length() const
+    template<class T>
+    int SortedList<T>::length() const
     {
         Node* ptr = head;
         int count = 0;
-        while(ptr->next != nullptr)
+
+        while(ptr != nullptr)
         {
             ptr = ptr->next;
             count++;
         }
+
         return count;
     }
 
-    SortedList::const_iterator SortedList::begin() const
+    template<class T>
+    typename SortedList<T>::const_iterator SortedList<T>::begin() const
     {
-        return const_iterator(this, 1);
+        return const_iterator(this, 0);
     }
 
-    SortedList::const_iterator SortedList::end() const
+    template<class T>
+    typename SortedList<T>::const_iterator SortedList<T>::end() const
     {
-        return const_iterator(this, this->length() + 1);
+        return const_iterator(this, this->length());
     }
 
     /* delete all the nodes in the list. */
-    void SortedList::clearNodes()
+    template<class T>
+    void SortedList<T>::clearNodes()
     {
-
-        Node* ptr = head->next;
+        Node* ptr = head;
         
         while(ptr != nullptr)
         {
@@ -200,34 +244,18 @@ namespace mtm
 
             ptr = next;
         }
-
-        head->next = nullptr;
-        
-        /*this deletes the head, the func insert assumes that head exists,
-        so it shouldn't delete the head. Head wasn't allocated with new so it shouldn''t be 
-        deleted anyway*/
-
-        // Node* ptr = head;
-        
-        // while(ptr != nullptr)
-        // {
-        //     Node* next = ptr->next;
-
-        //     delete ptr; 
-
-        //     ptr = next;
-        // }
+        head = nullptr;
     }
 
     /* DEBUG ONLY FUNCTIONS*/
-    void SortedList::print() const
+    template<class T>
+    void SortedList<T>::print() const
     {
         Node* ptr = head;
-        std::cout << "HEAD -> ";
         for (int i = 0; i < this->length(); i++)
         {
-            ptr = ptr->next;
             std::cout << ptr->data << " -> ";
+            ptr = ptr->next;
         }
         std::cout << "END(nullptr)" << std::endl; 
     }
@@ -236,24 +264,23 @@ namespace mtm
     /* *NODE IMPLEMENTATION* */
     /* ********************* */
 
-    /* Constructor */
-    SortedList::Node::Node() : data(0), next(nullptr) 
-    { }
-
     /* NODE constructor */
-    SortedList::Node::Node(const int data) : data(data), next(nullptr)
+    template<class T>
+    SortedList<T>::Node::Node(const T data) : data(data), next(nullptr)
     {
 
     }
 
     /* copy constructor */
-    SortedList::Node::Node(const Node& node) : data(node.data), next(node.next)
+    template<class T>
+    SortedList<T>::Node::Node(const Node& node) : data(node.data), next(node.next)
     {
 
     }
 
     /* Destructor */
-    SortedList::Node::~Node()
+    template<class T>
+    SortedList<T>::Node::~Node()
     {
         //auto-call the destructor of data... ( T )
     }
@@ -263,26 +290,30 @@ namespace mtm
     /* ************************* */
     
     /*constructor*/
-    SortedList::const_iterator::const_iterator(const SortedList* list, int index) : list(list), index(index)
+    template<class T>
+    SortedList<T>::const_iterator::const_iterator(const SortedList<T>* list, int index) : list(list), index(index)
     { }
 
-    /*constructor*/
-    SortedList::const_iterator& SortedList::const_iterator::operator++()
+    /*operator ++*/
+    template<class T>
+    typename SortedList<T>::const_iterator& SortedList<T>::const_iterator::operator++()
     {
         index++;
+        if(index >= list->length())
+        {
+            throw std::out_of_range();
+        }
         return *this;
     }
-
-    bool SortedList::const_iterator::operator==(const const_iterator& other) const
+    
+    template<class T>
+    bool SortedList<T>::const_iterator::operator==(const const_iterator& other) const
     {
-        /*
-        assert(set == i.set); -> not ideal, if not the same set then throw an exception
-        */
-
         return index == other.index;
     }
 
-    int SortedList::const_iterator::operator*() const
+    template<class T>
+    const T SortedList<T>::const_iterator::operator*() const
     {
         
         Node* current =  list->head;
