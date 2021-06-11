@@ -21,6 +21,15 @@ namespace mtm
             void remove(const_iterator element);
             int length() const;
             
+            // typename Predicate 
+
+            template<class Predicate>
+            SortedList filter(Predicate predicate) const; 
+
+            template<class Apply_func>
+            SortedList apply(Apply_func func) const;
+
+
             /*
             apply and filter methodes to be done...
             */
@@ -217,6 +226,41 @@ namespace mtm
 
         return count;
     }
+    
+    
+    template<class T>
+    template<class Predicate>
+    SortedList<T> SortedList<T>::filter(Predicate predicate) const
+    {
+        SortedList<T> filtered_list;
+
+        for(typename SortedList<T>::const_iterator it = begin(); ! (it == end()); ++it)
+        {
+            if(predicate (*it))
+            {
+                filtered_list.insert(*it);
+            }
+        }
+
+        return filtered_list;
+        
+    }
+
+    template<class T>
+    template<class Apply_func>
+    SortedList<T> SortedList<T>::apply(Apply_func func) const
+    {
+        SortedList<T> result;
+
+        for(typename SortedList<T>::const_iterator it = begin(); ! (it == end()); ++it)
+        {
+            T data = func(*it);
+            result.insert(data);
+        }
+
+        return result;
+    }
+
 
     template<class T>
     typename SortedList<T>::const_iterator SortedList<T>::begin() const
@@ -299,10 +343,10 @@ namespace mtm
     typename SortedList<T>::const_iterator& SortedList<T>::const_iterator::operator++()
     {
         index++;
-        if(index >= list->length())
-        {
-            throw std::out_of_range();
-        }
+        // if(index >= list->length())
+        // {
+        //     throw std::out_of_range();
+        // }
         return *this;
     }
     
