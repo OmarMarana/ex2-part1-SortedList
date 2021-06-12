@@ -1,6 +1,7 @@
  #ifndef SORTEDLIST_H_ //SortedList.h
  #define SORTEDLIST_H_
 #include <iostream>
+#include <stdexcept>
 
 
 
@@ -21,18 +22,11 @@ namespace mtm
             void remove(const_iterator element);
             int length() const;
             
-            // typename Predicate 
-
             template<class Predicate>
             SortedList filter(Predicate predicate) const; 
 
             template<class Apply_func>
             SortedList apply(Apply_func func) const;
-
-
-            /*
-            apply and filter methodes to be done...
-            */
 
             const_iterator begin() const;
             const_iterator end() const;
@@ -60,7 +54,7 @@ namespace mtm
             const_iterator(const const_iterator& iterator) = default;
             const_iterator& operator=(const const_iterator&) = default;
 
-            const_iterator& operator++(); // Usage: ++ it1 , if out of bound, throw std::out_of_range
+            const_iterator& operator++();
             bool operator==(const const_iterator& other) const;
             const T operator*() const;
     };
@@ -241,9 +235,7 @@ namespace mtm
                 filtered_list.insert(*it);
             }
         }
-
         return filtered_list;
-        
     }
 
     template<class T>
@@ -342,11 +334,12 @@ namespace mtm
     template<class T>
     typename SortedList<T>::const_iterator& SortedList<T>::const_iterator::operator++()
     {
+        if(index >= list->length())
+        {
+            throw std::out_of_range("TEST");
+        }
+        
         index++;
-        // if(index >= list->length())
-        // {
-        //     throw std::out_of_range();
-        // }
         return *this;
     }
     
@@ -367,6 +360,5 @@ namespace mtm
         }
         return current->data; 
     }
-
 }
 #endif
